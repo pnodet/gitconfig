@@ -12,20 +12,23 @@ editor = nvim
 pager = delta
 excludesfile = ~/.gitignore
 attributesfile = ~/.gitattributes
-trustctime = false # http://www.git-tower.com/blog/make-git-rebase-safe-on-osx
-untrackedCache = true # https://git-scm.com/docs/git-update-index#_untracked_cache
-precomposeunicode = false # http://michael-kuehnel.de/git/2014/11/21/git-mac-osx-and-german-umlaute.html
+trustctime = false           # http://www.git-tower.com/blog/make-git-rebase-safe-on-osx
+untrackedCache = true        # https://git-scm.com/docs/git-update-index#_untracked_cache
+precomposeunicode = false    # http://michael-kuehnel.de/git/2014/11/21/git-mac-osx-and-german-umlaute.html
 whitespace = -trailing-space # Don't consider trailing space change as a cause for merge conflicts
 
 [help]
 autocorrect = 1
 
+[web]
+browser = google-chrome
+
 [branch]
 sort = -committerdate
 
 [push]
-default = simple  # https://git-scm.com/docs/git-config#git-config-pushdefault
-followTags = true # Make `git push` push relevant annotated tags when pushing branches out.
+default = simple # https://git-scm.com/docs/git-config#git-config-pushdefault
+followTags = true
 autoSetupRemote = true
 
 [pull]
@@ -47,7 +50,7 @@ verbosity = 1
 keepBackup = false
 keepTemporaries = false
 writeToTemp = true # Put the temp files in a dedicated dir anyway
-prompt = false # Auto-accept file prompts when launching merge tools
+prompt = false     # Auto-accept file prompts when launching merge tools
 
 [apply]
 whitespace = fix # Detect whitespace errors when applying a patch
@@ -64,8 +67,8 @@ extendedRegexp = true # Consider most regexes to be ERE
 
 [log]
 abbrevCommit = true # Use abbrev SHAs whenever possible
-follow = true # Automatically --follow when given a single path
-decorate = false # Disable decorate for reflog
+follow = true       # Automatically --follow when given a single path
+decorate = false    # Disable decorate for reflog
 
 [fetch]
 writeCommitGraph = true
@@ -73,6 +76,13 @@ recurseSubmodules = on-demand # Auto-fetch submodule changes
 
 [interactive]
 diffFilter = delta --color-only
+
+[diff]
+renames = copies      # Detect copies as well as renames
+mnemonicPrefix = true # Use better, descriptive initials (c, i, w) instead of a/b.
+wordRegex = .         # When using --word-diff, assume --word-diff-regex=.
+submodule = log       # Display submodule-related information (commit listings)
+tool = vscode         # Use VSCode as default diff tool when running `git diff-tool`
 
 [delta]
 features = side-by-side line-numbers decorations
@@ -83,24 +93,55 @@ commit-decoration-style = bold yellow box ul
 file-style = bold yellow ul
 file-decoration-style = none
 
-[diff]
-renames = copies # Detect copies as well as renames
-mnemonicPrefix = true # Use better, descriptive initials (c, i, w) instead of a/b.
-wordRegex = . # When using --word-diff, assume --word-diff-regex=.
-submodule = log # Display submodule-related information (commit listings)
-tool = vscode # Use VSCode as default diff tool when running `git diff-tool`
-
 [diff "bin"]
 textconv = hexdump -v -C # Use `hexdump` to diff binary files
-
-[difftool]
-prompt = false
 
 [difftool "vscode"]
 cmd = code --wait --diff $LOCAL $REMOTE
 
-[web]
-browser = google-chrome
+[gitflow "prefix"]
+versiontag = v
+
+[filter "lfs"]
+clean = git-lfs clean -- %f
+smudge = git-lfs smudge -- %f
+process = git-lfs filter-process
+required = true
+
+[commit]
+gpgsign = true
+
+[gpg]
+format = ssh
+
+[gpg "ssh"]
+allowedSignersFile = ~/.ssh/allowed_signers
+
+[credential "https://dev.azure.com"]
+useHttpPath = true
+
+[maintenance]
+repo = ~/git/pimpup/pimpup-frontend
+
+[tag]
+# Sort tags as version numbers whenever applicable, so 1.10.2 is AFTER 1.2.0.
+sort = version:refname
+gpgsign = true
+
+[versionsort]
+prereleaseSuffix = -pre
+prereleaseSuffix = .pre
+prereleaseSuffix = -beta
+prereleaseSuffix = .beta
+prereleaseSuffix = -rc
+prereleaseSuffix = .rc
+
+[url "ssh://git@github.com/"]
+insteadOf = https://github.com/
+
+[diff "lockb"]
+textconv = bun
+binary = true
 
 [color]
 ui = auto
@@ -121,42 +162,6 @@ whitespace = red reverse
 added = green bold
 changed = yellow bold
 untracked = cyan bold
-
-[gitflow "prefix"]
-versiontag = v
-
-[sequence]
-editor = interactive-rebase-tool
-
-[filter "lfs"]
-clean = git-lfs clean -- %f
-smudge = git-lfs smudge -- %f
-process = git-lfs filter-process
-required = true
-
-[commit]
-gpgsign = true
-
-[gpg]
-format = ssh
-
-[gpg "ssh"]
-allowedSignersFile = /Users/pnodet/.ssh/allowed_signers
-
-[credential "https://dev.azure.com"]
-useHttpPath = true
-
-[tag]
-sort = version:refname # Sort tags as version numbers whenever applicable, so 1.10.2 is AFTER 1.2.0.
-gpgsign = true
-
-[versionsort]
-prereleaseSuffix = -pre
-prereleaseSuffix = .pre
-prereleaseSuffix = -beta
-prereleaseSuffix = .beta
-prereleaseSuffix = -rc
-prereleaseSuffix = .rc
 
 [alias]
 ############# Get the name of the main branch (master || main)
@@ -280,7 +285,8 @@ psuoc = !git push -u origin $(git bc)
 psdc = !git push origin :$(git bc)
 
 pl = pull --recurse-submodules
-pb = pull --rebase
+pld = pull --recurse-submodules --depth 1
+plrb = pull --rebase
 
 plo = pull origin
 plom = !git pull origin $(git main)
@@ -391,3 +397,6 @@ subrepo = !sh -c 'git filter-branch --prune-empty --subdirectory-filter $1 $(git
 human = name-rev --name-only --refs=refs/heads/*
 contributors = shortlog --summary --numbered                            # List contributors with number of commits
 credit = "!f() { git commit --amend --author \"$1 <$2>\" -C HEAD; }; f" # Credit an author on the latest commit
+#############
+ch = !git checkout $(git reflog show --pretty=format:'%gs ~ %gd' --date=relative | grep 'checkout:' | grep -oE '[^ ]+ ~ .*' | awk -F~ '!seen[$    1]++' | head -n 20 | cut -d '~' -f 1 | fzf)
+
